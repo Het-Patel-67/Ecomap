@@ -1,0 +1,10 @@
+{
+  "waterPollution": [
+    { "id": 1, "name": "Ganga River", "lat": 25.5941, "lng": 85.1376, "ph": 6.2, "status": "Moderate" },
+    { "id": 2, "name": "Yamuna River", "lat": 28.6139, "lng": 77.2090, "ph": 5.5, "status": "Polluted" }
+  ],
+  "landPollution": [
+    { "id": 1, "name": "Mumbai Landfill", "lat": 19.0760, "lng": 72.8777, "wasteLevel": "High" },
+    { "id": 2, "name": "Delhi Dumpyard", "lat": 28.7041, "lng": 77.1025, "wasteLevel": "Critical" }
+  ]
+}
