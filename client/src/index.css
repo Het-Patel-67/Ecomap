@@ -1,0 +1,56 @@
+@import "leaflet/dist/leaflet.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.map-container-style {
+  height: 500px; /* Define the height for the map */
+  width: 100%; /* Ensure it takes full width of its container */
+  border-radius: 0.5rem; /* Optional: adds rounded corners to match other elements */
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* Optional: adds shadow */
+}
+
+/* Animated background for login */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes floatSoft {
+  0% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-10px) translateX(6px); }
+  100% { transform: translateY(0px) translateX(0px); }
+}
+
+@keyframes floatSoftFast {
+  0% { transform: translateY(0px) translateX(0px) scale(1); }
+  50% { transform: translateY(12px) translateX(-6px) scale(1.03); }
+  100% { transform: translateY(0px) translateX(0px) scale(1); }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease infinite;
+}
+
+.animate-float-slow {
+  animation: floatSoft 8s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: floatSoftFast 6s ease-in-out infinite;
+}
+
+/* Subtle shimmer utility */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
