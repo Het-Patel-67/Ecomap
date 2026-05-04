@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, LogIn, UserPlus, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { loginMock, registerMock } from '../services/auth';
+import { loginUser, registerUser } from '../services/auth';
 
 const AuthForm = ({ isLogin, onCancel, toggleMode, onAuthSuccess, canClose = true }) => {
   const [email, setEmail] = useState('');
@@ -11,23 +11,21 @@ const AuthForm = ({ isLogin, onCancel, toggleMode, onAuthSuccess, canClose = tru
   const title = isLogin ? 'Sign In to Ecomap' : 'Create an Account';
   const buttonText = isLogin ? 'Login' : 'Register';
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    let success = false;
-    let action = isLogin ? 'Login' : 'Registration';
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
+  try {
     if (isLogin) {
-      success = loginMock(email, password);
+      await loginUser(email, password);
     } else {
-      success = registerMock(email, username, password);
+      await registerUser(username, email, password);
     }
-    
-    if (success) {
-        onAuthSuccess(action); // Notify App.jsx
-    } else {
-        alert("Authentication failed. Please fill all required fields.");
-    }
-  };
+
+    onAuthSuccess(); // Notify App.jsx
+  } catch (error) {
+    alert(error.message);
+  }
+};
 
   return (
     <div className="relative w-full max-w-md">

@@ -1,30 +1,57 @@
-// src/services/authService.js
+const API_BASE_URL = "http://localhost:5000/api"; 
 
-// Key used to store the authentication status in the browser's local storage
-const IS_LOGGED_IN_KEY = 'ecomap_user_logged_in';
+const TOKEN_KEY = "ecomap_token";
+
+export const getToken = () => {
+  return localStorage.getItem(TOKEN_KEY);
+};
 
 export const getAuthStatus = () => {
-    return localStorage.getItem(IS_LOGGED_IN_KEY) === 'true';
+  return !!localStorage.getItem(TOKEN_KEY);
 };
 
-export const loginMock = (email, password) => {
-    // Mock login: always succeeds if fields are filled (replace with real API call later)
-    if (email && password) {
-        localStorage.setItem(IS_LOGGED_IN_KEY, 'true');
-        return true;
-    }
-    return false;
+export const loginUser = async (email, password) => {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Login failed");
+  }
+
+  // Store JWT
+  localStorage.setItem(TOKEN_KEY, data.data.token);
+
+  return data;
 };
 
-export const registerMock = (email, username, password) => {
-    // Mock registration: always succeeds if fields are filled
-    if (email && username && password) {
-        localStorage.setItem(IS_LOGGED_IN_KEY, 'true');
-        return true;
-    }
-    return false;
+export const registerUser = async (name, email, password) => {
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Registration failed");
+  }
+
+  // Store JWT
+  localStorage.setItem(TOKEN_KEY, data.data.token);
+
+  return data;
 };
 
-export const logoutMock = () => {
-    localStorage.removeItem(IS_LOGGED_IN_KEY);
+export const logoutUser = () => {
+  localStorage.removeItem(TOKEN_KEY);
 };

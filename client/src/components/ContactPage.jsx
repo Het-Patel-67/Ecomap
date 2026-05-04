@@ -36,11 +36,11 @@ export default function ContactPage({ onBack }) {
         </div>
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <h3 className="font-semibold text-gray-900 flex items-center gap-2"><Mail className="w-5 h-5 text-emerald-600" /> Email</h3>
-          <p className="mt-2 text-gray-600 text-sm">ecopmap@gmail.com</p>
+          <p className="mt-2 text-gray-600 text-sm">ecomap@gmail.com</p>
         </div>
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <h3 className="font-semibold text-gray-900 flex items-center gap-2"><Phone className="w-5 h-5 text-emerald-600" /> Phone</h3>
-          <p className="mt-2 text-gray-600 text-sm">+1212173314</p>
+          <p className="mt-2 text-gray-600 text-sm">+917203868921</p>
         </div>
       </section>
 

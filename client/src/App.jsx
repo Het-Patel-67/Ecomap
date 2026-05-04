@@ -8,7 +8,7 @@ import DisasterAlerts from './components/DisasterAlerts';
 import AuthModal from './components/AuthModal'; 
 import LearnMore from './components/LearnMore';
 import ContactPage from './components/ContactPage';
-import { getAuthStatus, logoutMock } from './services/auth'; 
+import { getAuthStatus, logoutUser } from './services/auth';
 
 const LAND_POLLUTION_TYPES = [
     { key: 'All', label: 'Total Risk' },
@@ -33,10 +33,10 @@ export default function App() {
   };
 
   const handleLogout = () => {
-      logoutMock();
-      setIsLoggedIn(false);
-      setShowAuthModal(true);
-  };
+  logoutUser();
+  setIsLoggedIn(false);
+  setShowAuthModal(true);
+};
 
   const navigateTo = (view, type = null) => {
     setCurrentView(view);

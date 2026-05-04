@@ -235,7 +235,7 @@ export default function DisasterAlertsPage({ disasterType }) {
                     filteredAlerts.map(alert => (
                         <div 
                             key={alert.id} 
-                            className={`rounded-xl shadow-lg transition-all duration-300 overflow-hidden ${alert.color} border-l-8 ${alert.border}`}
+                            className={`rounded-xl shadow-lg transition-all duration-100 overflow-hidden ${alert.color} border-l-8 ${alert.border}`}
                         >
                             {/* Alert Status Header */}
                             <div 
