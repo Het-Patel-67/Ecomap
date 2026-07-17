@@ -1,11 +1,31 @@
-/node_modules
-/node_modules
-/server/.env
-/client/.env
-/dist   
-/build
-.DS_Store 
-/logs
-*.log
-/coverage
+# Environment variables
+.env
+.env.local
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# IDE
+.vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/
+.next/
+
+# Temporary files
+*.tmp
+.cache/
+
