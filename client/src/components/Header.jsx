@@ -53,7 +53,7 @@ export default function Header({ selectedLayer, setSelectedLayer, navigateTo, is
                   <ThermometerSun className="w-4 h-4 text-orange-600" /> <span>Heatwave / Coldwave</span>
                 </button>
                 <button onClick={() => { handleDisasterClick('Flood'); setIsDropdownOpen(false); setIsDisasterSubOpen(false); }} className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-50">
-                  <CloudRain className="w-4 h-4 text-blue-600" /> <span>Weather & Flood</span>
+                  <CloudRain className="w-4 h-4 text-blue-600" /> <span>Gujarat Flood & Weather</span>
                 </button>
                 <button onClick={() => { handleDisasterClick('Tsunami'); setIsDropdownOpen(false); setIsDisasterSubOpen(false); }} className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-50">
                   <Waves className="w-4 h-4 text-cyan-600" /> <span>Tsunami Alerts</span>
@@ -146,7 +146,7 @@ export default function Header({ selectedLayer, setSelectedLayer, navigateTo, is
               <ThermometerSun className='w-4 h-4 text-orange-600' /> Heatwave / Coldwave
             </button>
             <button onClick={() => handleDisasterClick('Flood')} className="w-full text-left px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 flex items-center gap-2 border">
-              <CloudRain className='w-4 h-4 text-blue-600' /> Weather & Flood
+              <CloudRain className='w-4 h-4 text-blue-600' /> Gujarat Flood & Weather
             </button>
             <button onClick={() => handleDisasterClick('Tsunami')} className="w-full text-left px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 flex items-center gap-2 border">
               <Waves className='w-4 h-4 text-cyan-600' /> Tsunami Alerts
