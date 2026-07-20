@@ -5,6 +5,7 @@ import { generateImpactReport } from "../services/gemini.service.js";
 export const generateReport = async (req, res, next) => {
   try {
     console.log("REQ BODY:", req.body);
+    
     const { prompt } = req.body;
     if (!prompt) {
       throw new ApiError(400, "Prompt is required");
