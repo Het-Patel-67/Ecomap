@@ -358,8 +358,9 @@ Tone: professional, urgent, factual.
 `;
 
         try {
+            const url = "https://ecomap-nt0b.onrender.com/api" || "http://localhost:5000/api";
             const token = getToken();
-            const response = await fetch("http://localhost:5000/api/ai/impact-report", {
+            const response = await fetch(`${url}/ai/impact-report`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
