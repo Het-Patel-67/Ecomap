@@ -102,6 +102,38 @@ const getWaterColor = (status) => {
     return 'blue';
 };
 
+// Shared helper so air/water risk scoring logic isn't duplicated across the file
+const getWaterRiskScore = (status) => {
+    if (!status) return 0;
+    const s = status.toLowerCase();
+    if (s.includes('critically polluted')) return 5;
+    if (s.includes('highly polluted') || s.includes('polluted')) return 4;
+    if (s.includes('moderate')) return 3;
+    return 1;
+};
+
+// Finds the actual data record for whichever district/station the user clicked,
+// so the report always reflects the CLICKED location instead of a computed "worst" one.
+const findLocationDataPoint = (currentPollutionData, layer, name) => {
+    if (!name) return null;
+
+    if (layer === 'air' || layer === 'land') {
+        return (currentPollutionData[layer] || []).find(
+            item => normalize(item.district) === normalize(name)
+        ) || null;
+    }
+
+    if (layer === 'water') {
+        return (currentPollutionData.water || []).find(w => {
+            const wName = normalize(w.station);
+            const sName = normalize(name);
+            return wName && (sName.includes(wName) || wName.includes(sName));
+        }) || null;
+    }
+
+    return null;
+};
+
 const getAqiValue = (dataPoint) => {
     if (!dataPoint) return 0;
 
@@ -160,7 +192,7 @@ const fetchLiveWaterData = async (setLiveWaterData, historicalWater) => {
 };
 
 // --- Solutions Panel Renderer (Defined outside the main component) ---
-const renderSolutionsPanel = (currentPollutionData, selectedLayer, selectedLandType, triggerImpactReport, reportStatus, impactReport) => {
+const renderSolutionsPanel = (currentPollutionData, selectedLayer, selectedLandType, triggerImpactReport, reportStatus, impactReport, selectedLocation) => {
     const getHighestRiskScore = (data, layer, landType) => {
         let maxScore = 0;
 
@@ -173,13 +205,7 @@ const renderSolutionsPanel = (currentPollutionData, selectedLayer, selectedLandT
         }
 
         if (layer === 'water' && data.water) {
-            const statusScores = data.water.map(p => {
-                const s = p.status.toLowerCase();
-                if (s.includes('critically polluted')) return 5;
-                if (s.includes('highly polluted') || s.includes('polluted')) return 4;
-                if (s.includes('moderate')) return 3;
-                return 1;
-            });
+            const statusScores = data.water.map(p => getWaterRiskScore(p.status));
             maxScore = statusScores.length > 0 ? Math.max(...statusScores) : 1;
         }
 
@@ -232,7 +258,32 @@ const renderSolutionsPanel = (currentPollutionData, selectedLayer, selectedLandT
         return 'Gujarat';
     };
 
-    const districtForReport = getDistrictForReport();
+    // --- THE FIX ---
+    // Only trust selectedLocation if it was clicked while on the SAME layer that's active now
+    // (prevents an old "air" click from leaking into a "water" report, etc.)
+    const clickedDataPoint = (selectedLocation && selectedLocation.layerType === selectedLayer)
+        ? findLocationDataPoint(currentPollutionData, selectedLayer, selectedLocation.name)
+        : null;
+
+    let districtForReport;
+    let scoreForReport;
+
+    if (clickedDataPoint) {
+        // A city/station was actually clicked on the map - use ITS data, not the "worst overall" one
+        districtForReport = selectedLocation.name;
+
+        if (selectedLayer === 'air') {
+            scoreForReport = getAqiValue(clickedDataPoint);
+        } else if (selectedLayer === 'land') {
+            scoreForReport = getLandScoreForFilter(clickedDataPoint, selectedLandType);
+        } else if (selectedLayer === 'water') {
+            scoreForReport = getWaterRiskScore(clickedDataPoint.status);
+        }
+    } else {
+        // Nothing clicked yet - fall back to the regional "highest risk" summary as a sensible default
+        districtForReport = getDistrictForReport();
+        scoreForReport = currentRiskScore;
+    }
 
     const showReportButton = (['air', 'water', 'land'].includes(selectedLayer)) && ((currentPollutionData[selectedLayer]?.length || 0) > 0);
 
@@ -246,8 +297,14 @@ const renderSolutionsPanel = (currentPollutionData, selectedLayer, selectedLandT
             {/* GEMINI IMPACT REPORT BUTTON AND OUTPUT */}
             {showReportButton && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-xs text-gray-500 mb-2">
+                        {clickedDataPoint
+                            ? <>Report will cover: <span className="font-semibold text-gray-700">{districtForReport}</span></>
+                            : <>No location selected — click a district or river station on the map to target the report (currently defaulting to <span className="font-semibold text-gray-700">{districtForReport}</span>).</>
+                        }
+                    </p>
                     <button
-                        onClick={() => triggerImpactReport(districtForReport, currentRiskScore, selectedLayer)}
+                        onClick={() => triggerImpactReport(districtForReport, scoreForReport, selectedLayer)}
                         disabled={reportStatus === 'loading'}
                         className={`w-full py-2 rounded-lg text-white font-semibold transition-colors flex items-center justify-center space-x-2 ${reportStatus === 'loading' ? 'bg-gray-400' : 'bg-red-600 hover:bg-red-700'}`}
                     >
@@ -307,6 +364,9 @@ export default function ExploreData({ selectedLayer, mode, historicalYear, selec
     // NEW GEMINI STATE
     const [impactReport, setImpactReport] = useState(null);
     const [reportStatus, setReportStatus] = useState('idle'); // idle, loading, success, error
+
+    // THE FIX: this was missing entirely - nothing ever stored which city/station was clicked
+    const [selectedLocation, setSelectedLocation] = useState(null); // { name, layerType }
 
     const isLive = mode === 'live';
 
@@ -413,6 +473,12 @@ Tone: professional, urgent, factual.
 
     }, [isLive, historicalYear]);
 
+    // Clear the clicked location whenever the layer (air/water/land) changes,
+    // so an old selection from a different layer can't be reused by mistake.
+    useEffect(() => {
+        setSelectedLocation(null);
+    }, [selectedLayer]);
+
 
     // --- GeoJSON Rendering Logic ---
 
@@ -500,6 +566,10 @@ Tone: professional, urgent, factual.
                         center={[station.lat, station.lng]}
                         pathOptions={{ color: color, fillColor: color, fillOpacity: 1 }}
                         radius={8}
+                        eventHandlers={{
+                            // THE FIX: actually remember which station was clicked
+                            click: () => setSelectedLocation({ name: station.station, layerType: 'water' })
+                        }}
                     >
                         <Popup>
                             <b>{station.station}</b><br />
@@ -550,6 +620,11 @@ Tone: professional, urgent, factual.
                 } else {
                     layer.bindPopup(`<b>${districtNameGeo} District</b><br/>AQI Data Not Monitored/Unavailable`);
                 }
+
+                // THE FIX: actually remember which district was clicked
+                layer.on('click', () => {
+                    setSelectedLocation({ name: districtNameGeo, layerType: 'air' });
+                });
             }
 
             // --- LAND POPUP ---
@@ -578,6 +653,11 @@ Tone: professional, urgent, factual.
                 }
 
                 layer.bindPopup(content);
+
+                // THE FIX: actually remember which district was clicked
+                layer.on('click', () => {
+                    setSelectedLocation({ name: districtNameGeo, layerType: 'land' });
+                });
             }
         };
 
@@ -641,7 +721,7 @@ Tone: professional, urgent, factual.
                     <h3 className="text-xl font-bold mb-3 border-b pb-2 text-gray-800">
                         Actionable Solutions
                     </h3>
-                    {renderSolutionsPanel(currentPollutionData, selectedLayer, selectedLandType, generateImpactReport, reportStatus, impactReport)}
+                    {renderSolutionsPanel(currentPollutionData, selectedLayer, selectedLandType, generateImpactReport, reportStatus, impactReport, selectedLocation)}
                 </div>
             </div>
         </div>
